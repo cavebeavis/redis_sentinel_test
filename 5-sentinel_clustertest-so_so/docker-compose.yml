@@ -1,0 +1,145 @@
+version: '3.7'
+services:
+  redis-cluster:
+    container_name: redis-cluster
+    build:
+      context: .
+      dockerfile: redis-replicas.Dockerfile
+    image: redis:alpine-nmap2-replicas
+    command: redis-cli -h 10.10.1.2 -p 6379 --user assman --pass assword --cluster create 10.10.1.2:6379 10.10.1.3:6379 10.10.1.4:6379 10.10.1.5:6379 10.10.1.6:6379 10.10.1.7:6379 --cluster-replicas 1 --cluster-yes
+    depends_on:
+      - redis2
+      - redis3
+      - redis4
+      - redis5
+      - redis6
+      - redis7
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.8
+  redis2:
+    container_name: redis2
+    build:
+      context: .
+      dockerfile: redis-replicas.Dockerfile
+    image: redis:alpine-nmap2-replicas
+    command: redis-server /etc/redis/redis.conf --bind 10.10.1.2 127.0.0.1
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.2
+  redis3:
+    container_name: redis3
+    build:
+      context: .
+      dockerfile: redis-replicas.Dockerfile
+    image: redis:alpine-nmap2-replicas
+    command: redis-server /etc/redis/redis.conf --bind 10.10.1.3 127.0.0.1
+    depends_on:
+      - redis2
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.3
+  redis4:
+    container_name: redis4
+    build:
+      context: .
+      dockerfile: redis-replicas.Dockerfile
+    image: redis:alpine-nmap2-replicas
+    command: redis-server /etc/redis/redis.conf --bind 10.10.1.4 127.0.0.1
+    depends_on:
+      - redis3
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.4
+  redis5:
+    container_name: redis5
+    build:
+      context: .
+      dockerfile: redis-replicas.Dockerfile
+    image: redis:alpine-nmap2-replicas
+    command: redis-server /etc/redis/redis.conf --bind 10.10.1.5 127.0.0.1
+    depends_on:
+      - redis4
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.5
+  redis6:
+    container_name: redis6
+    build:
+      context: .
+      dockerfile: redis-replicas.Dockerfile
+    image: redis:alpine-nmap2-replicas
+    command: redis-server /etc/redis/redis.conf --bind 10.10.1.6 127.0.0.1
+    depends_on:
+      - redis5
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.6
+  redis7:
+    container_name: redis7
+    build:
+      context: .
+      dockerfile: redis-replicas.Dockerfile
+    image: redis:alpine-nmap2-replicas
+    command: redis-server /etc/redis/redis.conf --bind 10.10.1.7 127.0.0.1
+    depends_on:
+      - redis6
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.7
+  sentinel1:
+    container_name: sentinel1
+    build:
+      context: .
+      dockerfile: sentinel.Dockerfile
+    image: redis:sentinel-nmap2
+    depends_on:
+      - redis-cluster
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.11
+  sentinel2:
+    container_name: sentinel2
+    build:
+      context: .
+      dockerfile: sentinel.Dockerfile
+    image: redis:sentinel-nmap2
+    depends_on:
+      - redis-cluster
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.12
+  sentinel3:
+    container_name: sentinel3
+    build:
+      context: .
+      dockerfile: sentinel.Dockerfile
+    image: redis:sentinel-nmap2
+    depends_on:
+      - redis-cluster
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.13
+  gotest:
+    container_name: gotest
+    build:
+      context: .
+      dockerfile: gotest.Dockerfile
+    image: redis:gotest
+    # https://stackoverflow.com/a/45450456
+    command: tail -F anything
+    depends_on:
+      - redis-cluster
+      - sentinel1
+      - sentinel2
+      - sentinel3
+    networks:
+      - red_net
+
+networks:
+  red_net:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.10.1.0/28
+         gateway: 10.10.1.1

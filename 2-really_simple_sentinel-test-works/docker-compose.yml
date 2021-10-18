@@ -1,0 +1,42 @@
+version: '3.7'
+services:
+  redis1:
+    container_name: redis1
+    image: redis:alpine
+    networks:
+      - red_net
+  redis2:
+    container_name: redis2
+    image: redis:alpine
+    networks:
+      - red_net
+  redis3:
+    container_name: redis3
+    image: redis:alpine
+    networks:
+      - red_net
+  sentinel1:
+    container_name: sentinel1
+    build:
+      context: .
+      dockerfile: sentinel.Dockerfile
+    networks:
+      - red_net
+  sentinel2:
+    container_name: sentinel2
+    build:
+      context: .
+      dockerfile: sentinel.Dockerfile
+    networks:
+      - red_net
+  sentinel3:
+    container_name: sentinel3
+    build:
+      context: .
+      dockerfile: sentinel.Dockerfile
+    networks:
+      - red_net
+
+networks:
+  red_net:
+    driver: bridge

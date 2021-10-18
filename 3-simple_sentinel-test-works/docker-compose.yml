@@ -1,0 +1,64 @@
+version: '3.7'
+services:
+  redis1:
+    container_name: redis1
+    image: redis:alpine-nmap
+    build:
+      context: .
+      dockerfile: redis.Dockerfile
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.2
+  redis2:
+    container_name: redis2
+    build:
+      context: .
+      dockerfile: redis.Dockerfile
+    image: redis:alpine-nmap
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.3
+  redis3:
+    container_name: redis3
+    build:
+      context: .
+      dockerfile: redis.Dockerfile
+    image: redis:alpine-nmap
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.4
+  sentinel1:
+    container_name: sentinel1
+    build:
+      context: .
+      dockerfile: sentinel.Dockerfile
+    image: redis:sentinel-nmap
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.5
+  sentinel2:
+    container_name: sentinel2
+    build:
+      context: .
+      dockerfile: sentinel.Dockerfile
+    image: redis:sentinel-nmap
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.6
+  sentinel3:
+    container_name: sentinel3
+    build:
+      context: .
+      dockerfile: sentinel.Dockerfile
+    image: redis:sentinel-nmap
+    networks:
+      red_net:
+        ipv4_address: 10.10.1.7
+
+networks:
+  red_net:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.10.1.0/28
+         gateway: 10.10.1.1
